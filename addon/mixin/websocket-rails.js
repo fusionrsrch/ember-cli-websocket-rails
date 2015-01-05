@@ -67,7 +67,7 @@ export default Ember.Mixin.create({
         this.set('state', 'disconnected');
     },
 
-    bind: function(event_name, callback) {
+    _bind_event: function(event_name, callback) {
         console.log('websockets_rails: bind()');
         var callbacks = this.get('callbacks');
         if ( callbacks[event_name] == null) { 
@@ -120,6 +120,15 @@ export default Ember.Mixin.create({
 //      return _results;
 //    };
 //
+
+    dispatch_channel: function(event) {
+        console.log('websockets_rails: dispatch_channel()');
+        var channels = this.get('channels');
+        if ( channels[event.channel] == null) {
+            return;
+        }
+        channels[event.channel].dispatch(event.name, event._data);
+    },
 
     new_message: function(data) {
         console.log('websockets_rails: new_message()');
@@ -200,22 +209,37 @@ export default Ember.Mixin.create({
         }
         return results;
     },
+//
+//  subscribe: (function(_this) {
+//    return function(channel_name, success_callback, failure_callback) {
+//      var channel;
+//      if (_this.channels[channel_name] == null) {
+//        channel = new WebSocketRails.Channel(channel_name, _this, false, success_callback, failure_callback);
+//        _this.channels[channel_name] = channel;
+//        return channel;
+//      } else {
+//        return _this.channels[channel_name];
+//      }
+//    };
+//  })(this)
+//
 
-    subscribe: function(channel_name, success_callback, failure_callback) {
+    _subscribe: function(channel_name, success_callback, failure_callback) {
         console.log('websockets_rails: subscribe()');
         var channels = this.get('channels');
         if (channels[channel_name] == null) {
             var channel = WebsocketRailsChannel.create({ name: channel_name, dispatcher: this, is_private: false, on_success: success_callback, on_failure: failure_callback });
             channels[channel_name] = channel;
             this.set('channels', channels);
-            return channel;
+//            return channel;
         }
         else {
-            return channels[channel_name];
+            
+ //           return channels[channel_name];
         }
     },
 
-    subscribe_private: function(channel_name, success_callback, failure_callback) {
+    _subscribe_private: function(channel_name, success_callback, failure_callback) {
         console.log('websockets_rails: subscribe_private()');
         var channels = this.get('channels');
         if (channels[channel_name] == null) {
@@ -229,7 +253,7 @@ export default Ember.Mixin.create({
         }
     },
 
-    trigger: function(event_name, data, success_callback, failure_callback) {
+    _trigger: function(event_name, data, success_callback, failure_callback) {
         console.log('websockets_rails: trigger()');
         var conn = this.get('conn');
         var connection_id = conn != null ? conn.connection_id : void 0;
@@ -253,23 +277,60 @@ export default Ember.Mixin.create({
         return event; 
     },
 
+    _unsubscribe: function(channel_name) {
+        console.log('websockets_rails: unsubscribe()');
+
+        var channels = this.get('channels');
+        if ( channels[channel_name] == null) {
+            return;
+        }
+
+        channels[channel_name]._destroy();
+        delete channels[channel_name];
+        this.set('channels', channels);
+    },
+
+    _bind_channel_event: function(channel_name, event_name, callback) {
+        console.log('websockets_rails: _bind_channel_event()');
+
+        var channels = this.get('channels');
+        if ( channels[channel_name] == null) {
+            return;
+        }
+
+        var channel = channels[channel_name];
+        channel.bind(event_name, callback)
+
+//        channels[channel_name]._destroy();
+//        delete channels[channel_name];
+//        this.set('channels', channels);
+
+
+    },
+
 
     actions: {
 
         trigger: function(event_name, data, success_callback, failure_callback) {
             console.log('websockets_rails: action -> trigger()');
-            this.trigger(event_name, data, success_callback, failure_callback);
+            this._trigger(event_name, data, success_callback, failure_callback);
         },
 
-        subscribe: function(channel_name) {
+        subscribe: function(channel_name, success_callback, failure_callback) {
             console.log('websockets_rails: action -> subscribe()');
-            this.subscribe(channel_name);
+            this._subscribe(channel_name, success_callback, failure_callback);
         },
 
-        bind: function(event_name, callback) {
-            console.log('websockets_rails: action -> bind()');
-            this.bind(event_name, callback);
+        bind_channel_event: function(channel_name, event_name, callback) {
+            console.log('websockets_rails: action -> bind_channel_event()');
+            this._bind_channel_event(channel_name, event_name, callback);
+        },
+
+        unsubscribe: function(channel_name) {
+            console.log('websockets_rails: action -> unsubscribe()');
+            this._unsubscribe(channel_name);
         }
+        
     }
     
 });

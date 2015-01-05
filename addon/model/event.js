@@ -54,9 +54,10 @@ export default Ember.Object.extend({
 
     attributes: function() {
         console.log('event: attributes()');
+        console.log( this );
         return {
             id: this.get('id'),
-            channel: this.get('channel'),
+            //channel: this.get('channel'),
             data: this.get('_data'),
             token: this.get('token')
         };
