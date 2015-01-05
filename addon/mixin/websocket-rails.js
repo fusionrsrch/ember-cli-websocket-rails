@@ -8,10 +8,6 @@ import WebsocketRailsWebsocketConnection from '../model/websocket_connection';
 export default Ember.Mixin.create({
 
     socketURL: null,
-//    socketContexts: {}, // This is shared between route instances.
-//    keepSocketAlive: null,
-//    socketConnection: null,
-//    socketBinaryType: null,
 
     callbacks: {},
     channels:  {},
@@ -20,13 +16,7 @@ export default Ember.Mixin.create({
     //setupController: function(controller) {
     setupController: function() {
 
-//        var urlHashKey;
         var socketURL        = this.get('socketURL');
-//        var websocket        = this.get('socketConnection');
-//        var socketContexts   = this.get('socketContexts');
-//        var socketBinaryType = this.get('socketBinaryType');
-
-        console.log( socketURL );
 
         this.connect();
 
@@ -50,18 +40,7 @@ export default Ember.Mixin.create({
             conn = WebsocketRailsWebsocketConnection.create({ url: socketURL, dispatcher: this });
         }
 
-        //console.log(conn);
-//    if (!(this.supports_websockets() && this.use_websockets)) {
-//      this._conn = new WebSocketRails.HttpConnection(this.url, this);
-//    } else {
-//      this._conn = new WebSocketRails.WebSocketConnection(this.url, this);
-//    }
-//    return this._conn.new_message = this.new_message;
-//  }
-//
-
         this.set('conn', conn );
-
     },
 
     supports_websockets: function() {
@@ -84,33 +63,24 @@ export default Ember.Mixin.create({
             delete conn.conn;
             
         } 
-//    if (this._conn) {
-//      this._conn.close();
-//      delete this._conn._conn;
-//      delete this._conn;
-//    }
 
         this.set('state', 'disconnected');
     },
-//
-//        return function(event) {
-//      var callback, _i, _len, _ref, _results;
-//      if (_this.callbacks[event.name] == null) {
-//        return;
-//      }
-//      _ref = _this.callbacks[event.name];
-//      _results = [];
-//      for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-//        callback = _ref[_i];
-//        _results.push(callback(event.data));
-//      }
-//      return _results;
-//
-    //var self = this;
+
+    bind: function(event_name, callback) {
+        console.log('websockets_rails: bind()');
+        var callbacks = this.get('callbacks');
+        if ( callbacks[event_name] == null) { 
+            callbacks[event_name] = [];
+        }
+        callbacks[event_name].push(callback);
+        this.set('callbacks', callbacks);
+    },
 
     dispatch: function(event) {
         console.log('websockets_rails: dispatch()');
         var callbacks = this.get('callbacks');
+//        console.log(callbacks);
         if (callbacks[event.name] == null) {
             return;
         }
@@ -118,12 +88,11 @@ export default Ember.Mixin.create({
         var results = [];
         for ( var i = 0; i < _callbacks.length; i++) {
             var callback = _callbacks[i];
-            results.push(callback(event.data));
+            results.push(callback(event._data));
         }
         return results;
     },
 //
-//  new_message: (function(_this) {
 //    return function(data) {
 //      var event, socket_message, _i, _len, _ref, _results;
 //      _results = [];
@@ -150,7 +119,6 @@ export default Ember.Mixin.create({
 //      }
 //      return _results;
 //    };
-//  })(this)
 //
 
     new_message: function(data) {
@@ -161,13 +129,13 @@ export default Ember.Mixin.create({
 
         for ( var i = 0; i < data.length; i++) {
 
-            var event = WebsocketRailsEvent.create({ message: data[i] });
+            var event = WebsocketRailsEvent.create({ data: data[i] });
 
             if (event.is_result()) {
 
                 if (queue[event.id] != null) {
                     var _queue = queue[event.id];
-                    _queue.run_callbacks(event.success, event.data);
+                    _queue.run_callbacks(event.success, event._data);
                 }
                 delete queue[event.id];
             }
@@ -199,21 +167,9 @@ export default Ember.Mixin.create({
         console.log('websockets_rails: pong()');
         var conn = this.get('conn');
         var connection_id = conn != null ? conn.connection_id : void 0;
-        var pong = WebsocketRailsEvent.create({ message: [ 'websocket_rails.pong', {}, { connection_id: connection_id } ]  });
+        var pong = WebsocketRailsEvent.create({ data: [ 'websocket_rails.pong', {}, connection_id ]  });
         conn.trigger(pong);
     },
-//
-//  connection_established: (function(_this) {
-//    return function(data) {
-//      _this.state = 'connected';
-//      _this._conn.setConnectionId(data.connection_id);
-//      _this._conn.flush_queue();
-//      if (_this.on_open != null) {
-//        return _this.on_open(data);
-//      }
-//    };
-//  })(this)
-//
     
     connection_established: function(data) {
         console.log('websockets_rails: connection_established()');
@@ -230,22 +186,6 @@ export default Ember.Mixin.create({
         console.log('websockets_rails: connection_stale()');
         return this.get('state') !== 'connected';
     },
-//
-//  reconnect_channels: function() {
-//    var callbacks, channel, name, _ref, _results;
-//    _ref = this.channels;
-//    _results = [];
-//    for (name in _ref) {
-//      channel = _ref[name];
-//      callbacks = channel._callbacks;
-//      channel.destroy();
-//      delete this.channels[name];
-//      channel = channel.is_private ? this.subscribe_private(name) : this.subscribe(name);
-//      channel._callbacks = callbacks;
-//      _results.push(channel);
-//    }
-//    return _results;
-//  }
 
     reconnect_channels: function() {
         console.log('websockets_rails: reconnect_channels()');
@@ -260,24 +200,6 @@ export default Ember.Mixin.create({
         }
         return results;
     },
-
-
-
-//
-//  subscribe: (function(_this) {
-//    return function(channel_name, success_callback, failure_callback) {
-//      var channel;
-//      if (_this.channels[channel_name] == null) {
-//        channel = new WebSocketRails.Channel(channel_name, _this, false, success_callback, failure_callback);
-//        _this.channels[channel_name] = channel;
-//        return channel;
-//      } else {
-//        return _this.channels[channel_name];
-//      }
-//    };
-//  })(this)
-//
-
 
     subscribe: function(channel_name, success_callback, failure_callback) {
         console.log('websockets_rails: subscribe()');
@@ -307,37 +229,47 @@ export default Ember.Mixin.create({
         }
     },
 
+    trigger: function(event_name, data, success_callback, failure_callback) {
+        console.log('websockets_rails: trigger()');
+        var conn = this.get('conn');
+        var connection_id = conn != null ? conn.connection_id : void 0;
+        var event = WebsocketRailsEvent.create({ data: [ event_name, data, connection_id ], success_callback: success_callback, failure_callback: failure_callback });
+        this.trigger_event(event);
+    },
+
+    trigger_event: function(event) {
+        console.log('websockets_rails: trigger_event()');
+
+        var queue = this.get('queue');
+        if ( queue[event.id] == null ) {
+            queue[event.id] = event;
+        } 
+        this.set('queue', queue);
+
+        var conn = this.get('conn');
+        if ( conn ) {
+            conn.trigger(event);
+        }
+        return event; 
+    },
+
+
     actions: {
 
-
-//       connection_established: function() {},
-
-//       bind: function() {},
-
-//        trigger: function(event_name, data, success_callback, failure_callback) {
-        trigger: function(event_name) {
-
-            console.log('trigger: ' + event_name );
-            //var event = new WebsocketRailsEvent([ event_name, data, { connection_id: this.connection_id } ], success_callback, failure_callback );
-            //var event = WebsocketRailsEvent.create({ message: [ event_name, data, {} ], success_callback: success_callback, failure_callback: failure_callback });
-            //var channel = WebsocketRailsChannel.create({ name: 'channel_name', dispatcher: this, is_private: false, on_success: success_callback, on_failure: failure_callback });
-//            var connection = WebsocketRailsHttpConnection.create();
-
-
+        trigger: function(event_name, data, success_callback, failure_callback) {
+            console.log('websockets_rails: action -> trigger()');
+            this.trigger(event_name, data, success_callback, failure_callback);
         },
 
-       trigger_event: function() {},
+        subscribe: function(channel_name) {
+            console.log('websockets_rails: action -> subscribe()');
+            this.subscribe(channel_name);
+        },
 
-//       dispatch: function() {},
-
-//       subscribe: function() {},
-
-//       subscribe_private: function() {},
-
-//       unsubscribe: function() {},
-
-//       dispatch_channel: function() {}
+        bind: function(event_name, callback) {
+            console.log('websockets_rails: action -> bind()');
+            this.bind(event_name, callback);
+        }
     }
-
     
 });

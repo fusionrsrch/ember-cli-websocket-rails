@@ -26,6 +26,8 @@ export default Ember.Object.extend({
         console.log( 'abstract_connection: send_event()' );
         var connection_id = this.get('connection_id');
         if (connection_id != null) {
+            console.log('WTF');
+            console.log(event);
             return event.connection_id = connection_id;
         }
     },
@@ -35,6 +37,9 @@ export default Ember.Object.extend({
         var dispatcher = this.get('dispatcher');
         if (dispatcher && dispatcher.conn === this) {
             dispatcher.state = 'disconnected';
+
+            console.log('WTF');
+            console.log(event);
             var close_event = WebsocketRailsEvent.create({ message: [ 'connection_closed', event ] });
             return dispatcher.dispatch(close_event);
         }
@@ -45,6 +50,8 @@ export default Ember.Object.extend({
         var dispatcher = this.get('dispatcher');
         if (dispatcher && dispatcher.conn === this) {
             dispatcher.state = 'disconnected';
+            console.log('WTF');
+            console.log(event);
             var error_event = WebsocketRailsEvent.create({ message: [ 'connection_errord', event ] });
             return dispatcher.dispatch(error_event);
         }

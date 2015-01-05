@@ -3,9 +3,11 @@ import WebsocketRailsEvent from '../model/event';
 
 export default Ember.Object.extend({
 
+    // WebsocketRailsChannel.create({ name: channel_name, dispatcher: this, is_private: true, on_success: success_callback, on_failure: failure_callback });
     init: function() {
+        console.log('channel: init()');
 
-        var event_name, ref;
+        var event_name;
 
         if ( this.get('is_private') ) {
             event_name = 'websocket_rails.subscribe_private';
@@ -14,7 +16,8 @@ export default Ember.Object.extend({
             event_name = 'websocket_rails.subscribe';
         }
 
-        var connection_id = ( ref = this.get('dispatcher')._conn) != null ? ref.get('connection_id') : void 0;
+        var conn = this.get('dispatcher').conn;
+        var connection_id = conn != null ? conn.connection_id : void 0;
 
         this.set('connection_id', connection_id );
         var event = WebsocketRailsEvent.create({ 
@@ -31,10 +34,12 @@ export default Ember.Object.extend({
     },
 
     is_public: function() {
+        console.log('channel: is_public()');
         return !this.get('is_private');
     },
 
     _destroy: function() {
+        console.log('channel: _destroy()');
 //        var event, event_name, _ref;
 //        if (this.connection_id === ((_ref = this._dispatcher._conn) != null ? _ref.connection_id : void 0)) {
 //            event_name = 'websocket_rails.unsubscribe';
@@ -52,6 +57,7 @@ export default Ember.Object.extend({
     },
 
     bind: function(event_name, callback) {
+        console.log('channel: bind()');
 //        var _base;
 //        if ((_base = this._callbacks)[event_name] == null) {
 //            _base[event_name] = [];
@@ -60,10 +66,12 @@ export default Ember.Object.extend({
     },
 
     unbind: function(event_name) {
+        console.log('channel: unbind()');
 //     return delete this._callbacks[event_name];
     },
 
     trigger: function(event_name, message) {
+        console.log('channel: trigger()');
 //    var event;
 //    event = new WebSocketRails.Event([
 //      event_name, message, {
@@ -80,6 +88,7 @@ export default Ember.Object.extend({
     },
 
     dispatch: function(event_name, message) {
+        console.log('channel: dispatch()');
 //    var callback, event, _i, _j, _len, _len1, _ref, _ref1, _results;
 //    if (event_name === 'websocket_rails.channel_token') {
 //      this._token = message['token'];

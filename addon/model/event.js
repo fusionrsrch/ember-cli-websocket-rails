@@ -2,31 +2,34 @@ import Ember from 'ember';
 
 export default Ember.Object.extend({
 
+    // var event = WebsocketRailsEvent.create( data: data, success_callback: success_callback, failure_callback: failure_callback });    
     init: function() {
         console.log('event: init()');
 
-        var message = this.get('message');
-        this.set('name', message[0] );
-        this.set('data', message[1] );
+        var data = this.get('data');
+        var name = data[0];
+        var attr = data[1]; 
 
-        var options = message[2];
-        
-        if (typeof options !== "undefined" && options !== null) {
+        this.set('name', name);
 
-            var id = options['id'] != null ? options['id'] : ((1 + Math.random()) * 0x10000) | 0;
-            this.set('id', id );
-            this.set('channel', options.channel );
-            this.set('token',  options.token );
-            this.set('connection_id', options.connection_id );
+        if (attr != null) {
+            var id = attr['id'] != null ? attr['id'] : ((1 + Math.random()) * 0x10000) | 0;
+            var channel = attr.channel != null ? attr.channel : void 0;
+            var _data = attr.data != null ? attr.data : attr;
+            var token = attr.token != null ? attr.token : void 0;
+            var connection_id = data[2];
 
-            if (options.success != null) {
+            this.set('id', id);
+            this.set('channel', channel);
+            this.set('token', token);
+            this.set('connection_id', connection_id);
+            this.set('_data', _data );
+
+            if (attr.success != null) {
                 this.set('result', true );
-                this.set('success', options.success );
+                this.set('success', attr.success);
             }
         }
-        
-//        console.log( message[0], message[1], message[2] );
-
     },
 
     is_channel: function() {
@@ -46,15 +49,15 @@ export default Ember.Object.extend({
 
     serialize: function() {
         console.log('event: serialize()');
-        return JSON.stringify([this.get('name'), this.get('data'), this.meta_data()]);
+        return JSON.stringify([this.get('name'), this.attributes()]);
     },
 
-    meta_data: function() {
-        console.log('event: meta_data()');
+    attributes: function() {
+        console.log('event: attributes()');
         return {
             id: this.get('id'),
-            connection_id: this.get('connection_id'),
             channel: this.get('channel'),
+            data: this.get('_data'),
             token: this.get('token')
         };
     },
