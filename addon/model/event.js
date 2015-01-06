@@ -4,7 +4,7 @@ export default Ember.Object.extend({
 
     // var event = WebsocketRailsEvent.create( data: data, success_callback: success_callback, failure_callback: failure_callback });    
     init: function() {
-        console.log('event: init()');
+        //console.log('event: init()');
 
         var data = this.get('data');
         var name = data[0];
@@ -33,28 +33,28 @@ export default Ember.Object.extend({
     },
 
     is_channel: function() {
-        console.log('event: is_channel()');
+        //console.log('event: is_channel()');
         return this.get('channel') != null;
     },
 
     is_result: function() {
-        console.log('event: is_result()');
+        //console.log('event: is_result()');
         return typeof this.get('result') !== 'undefined';
     },
 
     is_ping: function() {
-        console.log('event: is_ping()');
+        //console.log('event: is_ping()');
         return this.get('name') === 'websocket_rails.ping';
     },
 
     serialize: function() {
-        console.log('event: serialize()');
+        //console.log('event: serialize()');
         return JSON.stringify([this.get('name'), this.attributes()]);
     },
 
     attributes: function() {
-        console.log('event: attributes()');
-        console.log( this );
+        //console.log('event: attributes()');
+        //console.log( this );
         return {
             id: this.get('id'),
             //channel: this.get('channel'),
@@ -64,7 +64,7 @@ export default Ember.Object.extend({
     },
 
     run_callbacks: function(success, result) {
-        console.log('event: run_callbacks()');
+        //console.log('event: run_callbacks()');
         this.set('success', success);
         this.set('result',result);
         if (this.get('success') === true) {

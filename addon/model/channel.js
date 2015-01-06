@@ -5,7 +5,7 @@ export default Ember.Object.extend({
 
     // WebsocketRailsChannel.create({ name: channel_name, dispatcher: this, is_private: true, on_success: success_callback, on_failure: failure_callback });
     init: function() {
-        console.log('channel: init()');
+        //console.log('channel: init()');
 
         var event_name;
 
@@ -35,12 +35,12 @@ export default Ember.Object.extend({
     },
 
     is_public: function() {
-        console.log('channel: is_public()');
+        //console.log('channel: is_public()');
         return !this.get('is_private');
     },
 
     _destroy: function() {
-        console.log('channel: _destroy()');
+        //console.log('channel: _destroy()');
 
         var dispatcher = this.get('dispatcher');
         var conn = dispatcher.conn;
@@ -54,7 +54,7 @@ export default Ember.Object.extend({
     },
 
     bind: function(event_name, callback) {
-        console.log('channel: bind()');
+        //console.log('channel: bind()');
         var callbacks = this.get('callbacks');
         if ( callbacks[event_name] == null) {
             callbacks[event_name] = [];
@@ -64,14 +64,14 @@ export default Ember.Object.extend({
     },
 
     unbind: function(event_name) {
-        console.log('channel: unbind()');
+        //console.log('channel: unbind()');
         var callbacks = this.get('callbacks');
         delete callbacks[event_name];
         this.set('callbacks', callbacks);
     },
 
     trigger: function(event_name, message) {
-        console.log('channel: trigger()');
+        //console.log('channel: trigger()');
         var token = this.get('token');
         var event = WebsocketRailsEvent.create({ data: [ event_name, { channel: this.get('name'), data: message, token: token }, this.get('connection_id') ]  });
         if (!token) {
@@ -86,7 +86,7 @@ export default Ember.Object.extend({
     },
 
     dispatch: function(event_name, message) {
-        console.log('channel: dispatch()');
+        //console.log('channel: dispatch()');
         if (event_name === 'websocket_rails.channel_token') {
             var dispatcher = this.get('dispatcher');
             var conn = dispatcher.conn;
@@ -111,7 +111,7 @@ export default Ember.Object.extend({
     },
 
     flush_queue: function() {
-        console.log('channel: flush_queue()');
+        //console.log('channel: flush_queue()');
         var queue = this.get('queue');
         var dispatcher = this.get('dispatcher');
         for ( var i = 0; i < queue.length; i++) {

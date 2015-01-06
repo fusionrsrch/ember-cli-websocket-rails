@@ -5,7 +5,7 @@ export default WebsocketRailsAbstractConnection.extend({
     connection_type: 'websocket',
 
     init: function() {
-        console.log('websocket_connection: init()');
+        //console.log('websocket_connection: init()');
         this._super();
 
         var url        = this.get('url');
@@ -29,18 +29,18 @@ export default WebsocketRailsAbstractConnection.extend({
         var conn = new WebSocket(url);
 
         conn.onmessage = function(event) {
-            console.log('conn.onmessage');
+            //console.log('conn.onmessage');
             var event_data = JSON.parse(event.data);
             return self.on_message(event_data);
         };
 
         conn.onclose = function(event) {
-            console.log('conn.onclose');
+            //console.log('conn.onclose');
             return self.on_close(event);
         };
 
         conn.onerror = function(event) {
-            console.log('conn.onerror');
+            //console.log('conn.onerror');
             return self.on_error(event);
         };
         
@@ -49,12 +49,12 @@ export default WebsocketRailsAbstractConnection.extend({
     },
 
     close: function() {
-        console.log('websocket_connection: close()');
+        //console.log('websocket_connection: close()');
         return this.get('conn').close();
     },
 
     send_event: function(event) {
-        console.log('websocket_connection: send_event()');
+        //console.log('websocket_connection: send_event()');
         this._super();
         return this.get('conn').send(event.serialize());
     }
