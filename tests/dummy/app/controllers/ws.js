@@ -37,8 +37,9 @@ export default Ember.Controller.extend({
 
         var channel_event = function(data) {
             //var data = data.data;
-            console.log("channel event received");
-            console.log(data);
+            //console.log("channel event received");
+            //console.log(data);
+            alert("channel event received"+data);
         };
 
         this.send('bind_channel_event', 'test_channel', 'heartbeat', channel_event );
@@ -48,7 +49,32 @@ export default Ember.Controller.extend({
     unsubscribeButton: function() {
         console.log('unsubscribe');
         this.send('unsubscribe', 'test_channel' );
-    }
+    },
+//
+//var private_channel = dispatcher.subscribe_private('channel_name', function() {
+//  // success callback
+//  console.log( current_user.name + "Has joined the channel" );
+//}, function(reason) {
+//  // failure callback
+//  console.log( "Authorization failed because " + reason.message );
+//});
+//
+    privateSubscribeButton: function() {
+        console.log('private subscribe');
 
+        this.send('subscribe_private', 'private_channel', function() {
+            // success callback
+            console.log( "Has joined the channel" );
+        },  function(reason) {
+            // failure callback
+            console.log( "Authorization failed because" );
+        });
+    },
+
+    privateUnsubscribeButton: function() {
+        console.log('private unsubscribe');
+        this.send('unsubscribe', 'private_channel' );
+    }
+    
   }
 });

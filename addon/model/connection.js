@@ -4,6 +4,7 @@ import WebsocketRailsEvent from '../model/event';
 export default Ember.Object.extend({
 
     init: function() {
+        this.set('message_queue', []);
 
     },
 
@@ -50,7 +51,7 @@ export default Ember.Object.extend({
 
     flush_queue: function() {
 
-        message_queue = this.get('message_queue');
+        var message_queue = this.get('message_queue');
 
         for ( var i = 0; i < message_queue.length; i++ ) {
             this.trigger( message_queue.length[i] );

@@ -299,13 +299,7 @@ export default Ember.Mixin.create({
         }
 
         var channel = channels[channel_name];
-        channel.bind(event_name, callback)
-
-//        channels[channel_name]._destroy();
-//        delete channels[channel_name];
-//        this.set('channels', channels);
-
-
+        channel.bind(event_name, callback);
     },
 
 
@@ -319,6 +313,11 @@ export default Ember.Mixin.create({
         subscribe: function(channel_name, success_callback, failure_callback) {
             console.log('websockets_rails: action -> subscribe()');
             this._subscribe(channel_name, success_callback, failure_callback);
+        },
+
+        subscribe_private: function(channel_name, success_callback, failure_callback) {
+            console.log('websockets_rails: action -> subscribe_private()');
+            this._subscribe_private(channel_name, success_callback, failure_callback);
         },
 
         bind_channel_event: function(channel_name, event_name, callback) {

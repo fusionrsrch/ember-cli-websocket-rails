@@ -2,33 +2,6 @@ import Ember from 'ember';
 import WebsocketRailsEvent from '../model/event';
 
 export default Ember.Object.extend({
-//
-//  constructor: function(name, _dispatcher, is_private, on_success, on_failure) {
-//    var event, event_name, _ref;
-//    this.name = name;
-//    this._dispatcher = _dispatcher;
-//    this.is_private = is_private != null ? is_private : false;
-//    this.on_success = on_success;
-//    this.on_failure = on_failure;
-//    this._callbacks = {};
-//    this._token = void 0;
-//    this._queue = [];
-//    if (this.is_private) {
-//      event_name = 'websocket_rails.subscribe_private';
-//    } else {
-//      event_name = 'websocket_rails.subscribe';
-//    }
-//    this.connection_id = (_ref = this._dispatcher._conn) != null ? _ref.connection_id : void 0;
-//    event = new WebSocketRails.Event([
-//      event_name, {
-//        data: {
-//          channel: this.name
-//        }
-//      }, this.connection_id
-//    ], this._success_launcher, this._failure_launcher);
-//    return this._dispatcher.trigger_event(event);
-//  }
-//
 
     // WebsocketRailsChannel.create({ name: channel_name, dispatcher: this, is_private: true, on_success: success_callback, on_failure: failure_callback });
     init: function() {
@@ -43,20 +16,16 @@ export default Ember.Object.extend({
             event_name = 'websocket_rails.subscribe';
         }
 
-        var conn = this.get('dispatcher').conn;
+        var dispatcher = this.get('dispatcher');
+        var conn = dispatcher.conn;
         var connection_id = conn != null ? conn.connection_id : void 0;
 
         this.set('connection_id', connection_id );
-//        var event = WebsocketRailsEvent.create({ 
-//                        message: [ event_name, { channel: this.get('name') }, { connection_id: this.get('connection_id') } ], 
-//                        success_callback: success_callback, failure_callback: failure_callback 
-//        });
         var event = WebsocketRailsEvent.create({ 
                         data: [ event_name, { channel: this.get('name') }, this.get('connection_id') ], 
-                        success_callback: this._success_launcher, failure_callback: this._failure_launcher 
+                        success_callback: this.get('on_success'), failure_callback: this.get('on_failure') 
         });
 
-        var dispatcher = this.get('dispatcher');
         dispatcher.trigger_event(event);
 
         this.set('callbacks', {} );
@@ -115,27 +84,7 @@ export default Ember.Object.extend({
             dispatcher.trigger_event(event);
         }
     },
-//
-//  dispatch: function(event_name, message) {
-//    var callback, _i, _len, _ref, _ref1, _results;
-//    if (event_name === 'websocket_rails.channel_token') {
-//      this.connection_id = (_ref = this._dispatcher._conn) != null ? _ref.connection_id : void 0;
-//      this._token = message['token'];
-//      return this.flush_queue();
-//    } else {
-//      if (this._callbacks[event_name] == null) {
-//        return;
-//      }
-//      _ref1 = this._callbacks[event_name];
-//      _results = [];
-//      for (_i = 0, _len = _ref1.length; _i < _len; _i++) {
-//        callback = _ref1[_i];
-//        _results.push(callback(message));
-//      }
-//      return _results;
-//    }
-//  }
-//
+
     dispatch: function(event_name, message) {
         console.log('channel: dispatch()');
         if (event_name === 'websocket_rails.channel_token') {
@@ -159,40 +108,17 @@ export default Ember.Object.extend({
             }
             return results;
         }
-
     },
-//
-//  flush_queue: function() {
-//    var event, _i, _len, _ref;
-//    _ref = this._queue;
-//    for (_i = 0, _len = _ref.length; _i < _len; _i++) {
-//      event = _ref[_i];
-//      this._dispatcher.trigger_event(event);
-//    }
-//    return this._queue = [];
-//  }
-//
+
     flush_queue: function() {
         console.log('channel: flush_queue()');
-    },
-
-
-    _success_launcher: function(data) {
-        console.log('channel: _success_launcher()');
-        var on_success = this.get('on_success');
-        if ( on_success != null) {
-            on_success(data);
+        var queue = this.get('queue');
+        var dispatcher = this.get('dispatcher');
+        for ( var i = 0; i < queue.length; i++) {
+            dispatcher.trigger_event( queue[i] );
         }
-    },
 
-    _failure_launcher: function(data) {
-        console.log('channel: _failure_launcher()');
-        var on_failure = this.get('on_failure');
-        if ( on_failure != null) {
-            on_failure(data);
-        }
-    } 
-
-
+        this.set('queue', []);
+    }
 
 });
