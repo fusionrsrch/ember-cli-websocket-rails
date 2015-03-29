@@ -1,5 +1,26 @@
+<h3>WebSockets</h3>
+
+<table>
+<tr><td>Name:</td><td>{{input type="text" value=name size=100}}</td></tr>
+<tr><td>Completed:</td><td>{{input type="checkbox" name="isCompleted" checked=isCompleted}}</td></tr>
+<table>
+
 <button {{action 'buttonClicked'}} class="btn btn-primary">Send</button>
+
+<p>Click the "Send" button to make a "task" creation request to the Rails server</p>
+
+<h3>Public Channels</h3>
+
 <button {{action 'subscribeButton'}} class="btn btn-primary">Subscribe</button>
 <button {{action 'unsubscribeButton'}} class="btn btn-primary">Unsubscribe</button>
+
+<p>Click the "Subscribe" button to connect to a WebSocket channel named "public_test" provided by the Rails server. In another browser tab,  go to <a href="//localhost:3000/public_channel">localhost:3000/public_channel</a>. For every GET request at this URL, an alert will be fired on this page until the "Unsubscribe" button is clicked.</p>
+
+<h3>Private Channels</h3>
+
+Username: {{input type="test" value=username}} <br /><br />
+
 <button {{action 'privateSubscribeButton'}} class="btn btn-primary">Private Subscribe</button>
 <button {{action 'privateUnsubscribeButton'}} class="btn btn-primary">Private Unsubscribe</button>
+
+<p>Click the "Private Subscribe" button to connect to a WebSocket channel named "private_test" provided by the Rails server. In another browser tab,  go to <a href="//localhost:3000/private_channel">localhost:3000/private_channel</a>. For every GET request at this URL, an alert will be fired on this page until the "Private Unsubscribe" button is clicked.</p>

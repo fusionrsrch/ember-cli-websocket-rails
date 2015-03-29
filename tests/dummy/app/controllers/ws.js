@@ -2,79 +2,63 @@ import Ember from 'ember';
 
 export default Ember.Controller.extend({
 
-  chatRoomInputText: null,
-  chatRoomUserName: 'Testing',
+    name:        'Start taking advantage of WebSockets with Ember CLI and Rails',
+    isCompleted: false,
+    username: 'special_user',
 
-  actions: {
+    actions: {
 
-    buttonClicked: function() {
-      console.log('emit');
+        buttonClicked: function() {
+            console.log('send');
 
-        var success = function(response) {
-            console.log(response);
-            console.log("Wow it worked: "+response.message);
-        };
+            var success = function(response) {
+                console.log("request success: "+JSON.stringify(response));
+            };
 
-        var failure = function(response) {
-            console.log("That just totally failed: "+response.message);
-        };
+            var failure = function(response) {
+                console.log("request failed: "+response.message);
+            };
 
-        var task = {
-            name: 'Start taking advantage of WebSockets with Ember',
-            completed: false
-        };
+            var task = {
+                name:      this.get('name'),
+                completed: this.get('isCompleted'), 
+            };
 
-        //this.send('trigger', 'tasks.create', {name: 'Start taking advantage of WebSockets', completed: false} );
-        this.send('trigger', 'tasks.create', task, success, failure );
+            this.send('trigger', 'tasks.create', task, success, failure );
+        },
 
-        //this.send('subscribe', 'channel_name' );
+        subscribeButton: function() {
+            console.log('subscribe to public_channel');
 
-    },
+            this.send('subscribe', 'public_channel' );
 
-    subscribeButton: function() {
-        console.log('subscribe');
-        this.send('subscribe', 'test_channel' );
+            var channel_event = function(data) {
+                alert("public channel event received: "+JSON.stringify(data));
+            };
 
-        var channel_event = function(data) {
-            //var data = data.data;
-            //console.log("channel event received");
-            //console.log(data);
-            alert("channel event received"+data);
-        };
+            this.send('bind_channel_event', 'public_channel', 'test_event', channel_event );
+        },
 
-        this.send('bind_channel_event', 'test_channel', 'heartbeat', channel_event );
-        
-    },
+        unsubscribeButton: function() {
+            console.log('unsubscribe from public_channel');
+            this.send('unsubscribe', 'public_channel' );
+        },
 
-    unsubscribeButton: function() {
-        console.log('unsubscribe');
-        this.send('unsubscribe', 'test_channel' );
-    },
-//
-//var private_channel = dispatcher.subscribe_private('channel_name', function() {
-//  // success callback
-//  console.log( current_user.name + "Has joined the channel" );
-//}, function(reason) {
-//  // failure callback
-//  console.log( "Authorization failed because " + reason.message );
-//});
-//
-    privateSubscribeButton: function() {
-        console.log('private subscribe');
+        privateSubscribeButton: function() {
+            console.log('subscribe to private channel');
 
-        this.send('subscribe_private', 'private_channel', function() {
-            // success callback
-            console.log( "Has joined the channel" );
-        },  function(reason) {
-            // failure callback
-            console.log( "Authorization failed because" );
-        });
-    },
+            this.send('subscribe_private', 'private_channel', function() {
+                // success callback
+                console.log( "Has joined the channel" );
+            },  function(reason) {
+                // failure callback
+                console.log( "Authorization failed because: "+JSON.stringify(reason) );
+            });
+        },
 
-    privateUnsubscribeButton: function() {
-        console.log('private unsubscribe');
-        this.send('unsubscribe', 'private_channel' );
+        privateUnsubscribeButton: function() {
+            console.log('unsubscribe from private channel');
+            this.send('unsubscribe', 'private_channel' );
+        }
     }
-    
-  }
 });
